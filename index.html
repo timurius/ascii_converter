@@ -3,12 +3,31 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
+	<link rel="stylesheet" href="./style.css">
+	<title>img2ascii</title>
 </head>
 <body>
-	<input type="file" id="input"><br>
-	<input type="text" id="gradient" spellcheck="false" placeholder=""></input>
-	<canvas id="preview"></canvas>
+	<div class="container">
+		<div class="window">
+			<div class="input_file">
+				<input type="file" id="imgInput">
+			</div>
+			<form class="input">
+				<input type="text" id="gradient" spellcheck="false" placeholder="" />
+				<div>
+					<input type="radio" name="mode" value="mean" />
+				</div>
+				<div>
+					<input type="checkbox" name="gradient" />
+					<input type="checkbox" name="outline" />
+				</div>
+			</form>
+			<div class="output">
+				<canvas id="preview"></canvas>
+				<p id="txtOutput"></p>
+			</div>
+		</div>
+	</div>
 	<script src="./script.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 "use strict";
-let imgInput = document.getElementById('input');
+let imgInput = document.getElementById('imgInput');
 imgInput.addEventListener('change', async (e) => { await handler(e) });
 let cvs = document.getElementById('preview');
 let gradient = `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'.`
@@ -24,6 +24,21 @@ function toPixels(ctx, width, height){
 	return ctx.getImageData(0, 0, width, height);
 }
 
+function ASCIIConverter(pixels, width, height, scale, gradient) {
+	let result;
+	for (let y = yOffset; y <= height; y++) {
+		for (let x = xOffset; x <= width; x + 4){
+
+		}
+	}
+			
+}
+
+function extractColors(pixels) {
+	let colors = {};
+	//for (let pixel = 0
+}
+
 async function handler(event){
 	let file = event.target.files[0];
 	let img, ctx, pixels;
@@ -32,6 +47,6 @@ async function handler(event){
 		img = await readImg(file);
 		ctx = loadImg(img, cvs);
 		pixels = toPixels(ctx, cvs.width, cvs.height);
-		console.log(pixels);
+		//const pixelsCropped, widthCropped, heightCropped = ...crop(pixels, scale);
 	}
 }
