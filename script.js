@@ -4,10 +4,15 @@ let imgInput = document.getElementById('imgInput');
 imgInput.addEventListener('change', uploadHandler);
 const imgDropZone = document.getElementById('imgDropZone');
 let cvs = document.getElementById('preview');
-let gradient = `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'.`
+let gradient = `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'. `;
 let gradientInput = document.getElementById('gradient');
+let output = document.getElementById('txtOutput');
 gradientInput.placeholder = gradient;
 gradientInput.addEventListener('change', (e) => {gradient = e.target.value});
+let scale;
+scale = 1;
+
+const worker = new Worker('formatpixels.js');
 
 async function process(file) {
 	let img, ctx, pixels;
@@ -16,7 +21,8 @@ async function process(file) {
 		img = await readImg(file);
 		ctx = loadImg(img, cvs);
 		pixels = toPixels(ctx, cvs.width, cvs.height);
-		//const pixelsCropped, widthCropped, heightCropped = ...crop(pixels, scale);
+		console.log(pixels);
+		output.textContent = toASCII(pixels, cvs.width, cvs.height, scale, gradient, mean);
 	}
 }
 
@@ -34,25 +40,56 @@ function loadImg(img, cvs) {
 }
 
 function toPixels(ctx, width, height){
-	return ctx.getImageData(0, 0, width, height);
+	return ctx.getImageData(0, 0, width, height).data;
 }
 
-function ASCIIConverter(pixels, width, height, scale, gradient) {
-	let result;
-	for (let y = yOffset; y <= height; y++) {
-		for (let x = xOffset; x <= width; x + 4){
-
+function toASCII(pixels, width, height, scale, gradient, mode) {
+	console.log(`pixels = ${pixels}, width = ${width}, height = ${height}, scale = ${scale}, gradient = ${gradient}, mode = ${mode}`);
+	let result = Array(width * height);
+	let x = 0, y = 0, xOffset = 0, chunk = []; 
+	while (x < width * 4) {
+		y = 0;
+		chunk.length = 0;
+		console.log(`x = ${x}`);
+		while (y < height) {
+			xOffset = 0;
+			console.log(`y = ${y}`);
+			while (xOffset < scale * 4 && x + xOffset < width * 4) {
+				console.log(`xOffset = ${xOffset}, position in chunk: ${(x + xOffset) + width * 4 * y}`);
+				chunk.push(pixels[ (x + xOffset) + width * 4 * y ]);	
+				++xOffset;
+			}
+			console.log('chunk: ', chunk);
+			if (y % scale === 0 || y === height - 1) {
+				let character = mean(chunk, gradient);
+				result[ x / 4 + width * y ] = character;
+				console.log('result: ', result, 'result position: ', x / 4 + width * y, 'character: ', character);
+				chunk.length = 0;
+			}
+			y += 1;
 		}
+		x += scale * 4;
 	}
+	result = result.join('')
+	for (let i = 0; i < height; ++i) {
+		result = result.substring(0, i * width + i) + '\n' + result.substring(i * width + i);
+	}
+	return result;
 }
 
-function extractColors(pixels) {
-	let colors = {};
-	//for (let pixel = 0
+function mean(chunk, gradient) {
+	let character = '';
+	let total = 0;
+	for (let i = 0; i < chunk.length; i += 4){
+		total = total + (chunk[i] + chunk[i + 1] + chunk[i + 2]);
+	}
+	const average = total / 3 / ( chunk.length / 4 );
+	return gradient[ Math.floor(average / (255 / (gradient.length - 1))) ];
 }
 
 async function uploadHandler(event){
 	file = event.target.files[0];
+	console.log(file);
 	event.target.parentElement.style.display = "none";
 	process(file);
 }
@@ -62,6 +99,7 @@ function dropHandler(event) {
 	event.target.style.display = "none";
 	process(file);
 }
+
 window.addEventListener("drop", (e) => {
 	e.preventDefault();
 });

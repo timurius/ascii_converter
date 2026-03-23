@@ -52,6 +52,7 @@ body {
 	align-content: center;
 	flex-direction: column;
 	text-align: center;
+	z-index: 2;
 }
 .input_file > input {
 	display: none;
@@ -60,5 +61,16 @@ body {
 	
 }
 .output {
-
+	display: flex;
+	position: relative;
+	align-content: center;
+	justify-content: center;
+}
+.output > * {
+	position: absolute;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	white-space: pre-wrap;
+	display: block;
 }
