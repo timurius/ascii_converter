@@ -71,9 +71,12 @@ function toASCII(pixels, width, height, scale, gradient, mode) {
 		x += scale * 4;
 	}
 	result = result.join('')
-	for (let i = 0; i < height; ++i) {
-		result = result.substring(0, i * width + i) + '\n' + result.substring(i * width + i);
+	let position = 0;
+	for (let i = 1; i < Math.round(height / scale); ++i) {
+		position = i * (Math.floor(width / scale) + width % scale) + (i - 1);
+		result = result.substring(0, position) + '\n' + result.substring(position);
 	}
+	console.log(result);
 	return result;
 }
 
