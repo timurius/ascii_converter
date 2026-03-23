@@ -4,6 +4,8 @@
 	--border-width: 5px;
 }
 body {
+	font-family: "Roboto Mono", monospace;
+	font-style: normal;
 	color: var(--main-color);
 	background-color: var(--bg-color);
 	padding: 0px;
@@ -71,6 +73,17 @@ body {
 	width: 100%;
 	margin: 0px;
 	padding: 0px;
-	white-space: pre-wrap;
-	display: block;
 }
+.output > p {
+	display: flex;
+	white-space: pre-wrap;
+	font-size: 16px;
+	line-height: 1em;
+	flex-wrap: wrap;
+}
+.output > p > div {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+}
+

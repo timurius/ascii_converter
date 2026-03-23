@@ -15,14 +15,17 @@ scale = 1;
 const worker = new Worker('formatpixels.js');
 
 async function process(file) {
-	let img, ctx, pixels;
+	let img, ctx, pixels, ASCII, HTML;
 
 	if (file.type.startsWith("image")) {
 		img = await readImg(file);
 		ctx = loadImg(img, cvs);
 		pixels = toPixels(ctx, cvs.width, cvs.height);
 		console.log(pixels);
-		output.textContent = toASCII(pixels, cvs.width, cvs.height, scale, gradient, mean);
+		ASCII = toASCII(pixels, cvs.width, cvs.height, scale, gradient, mean);
+		HTML = toHTML(ASCII);
+		output.style['font-size'] = output.offsetWidth / (cvs.width / scale) + "px";
+		output.innerHTML = HTML;  
 	}
 }
 
@@ -78,6 +81,21 @@ function toASCII(pixels, width, height, scale, gradient, mode) {
 	}
 	console.log(result);
 	return result;
+}
+
+function toHTML(ASCII) {
+	let result = '';
+	ASCII = ASCII.split('\n')
+	return ASCII.map( (row) => {
+		let editedRow = ''
+		console.log(row);
+		for (let i = 0; i < row.length; i++){
+			console.log(row[i]);
+			editedRow += '<span>' + row[i] + '</span>';
+		}
+		console.log(editedRow);
+		return '<div>' + editedRow + '</div>';
+	} ).join('');
 }
 
 function mean(chunk, gradient) {
