@@ -9,8 +9,11 @@ let gradientInput = document.getElementById('gradient');
 let output = document.getElementById('txtOutput');
 gradientInput.placeholder = gradient;
 gradientInput.addEventListener('change', (e) => {gradient = e.target.value});
-let scale;
-scale = 1;
+let scaleInput = document.getElementById('scale');
+let scale = 8;
+scaleInput.addEventListener('change', (e) => {
+	scale = e.target.value;
+});
 
 const worker = new Worker('formatpixels.js');
 
@@ -23,8 +26,9 @@ async function process(file) {
 		pixels = toPixels(ctx, cvs.width, cvs.height);
 		console.log(pixels);
 		ASCII = toASCII(pixels, cvs.width, cvs.height, scale, gradient, mean);
+		console.log(ASCII);
 		HTML = toHTML(ASCII);
-		output.style['font-size'] = output.offsetWidth / (cvs.width / scale) + "px";
+		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / scale) + "px";
 		output.innerHTML = HTML;  
 	}
 }
@@ -47,26 +51,27 @@ function toPixels(ctx, width, height){
 }
 
 function toASCII(pixels, width, height, scale, gradient, mode) {
-	console.log(`pixels = ${pixels}, width = ${width}, height = ${height}, scale = ${scale}, gradient = ${gradient}, mode = ${mode}`);
-	let result = Array(width * height);
+	//console.log(`pixels = ${pixels}, width = ${width}, height = ${height}, scale = ${scale}, gradient = ${gradient}, mode = ${mode}`);
+	let result = Array(Math.ceil((width / scale) * (height / scale)));
 	let x = 0, y = 0, xOffset = 0, chunk = []; 
 	while (x < width * 4) {
 		y = 0;
 		chunk.length = 0;
-		console.log(`x = ${x}`);
+		//console.log(`x = ${x}`);
 		while (y < height) {
 			xOffset = 0;
-			console.log(`y = ${y}`);
-			while (xOffset < scale * 4 && x + xOffset < width * 4) {
-				console.log(`xOffset = ${xOffset}, position in chunk: ${(x + xOffset) + width * 4 * y}`);
+			//console.log(`y = ${y}`);
+			while ( (xOffset < scale * 4) && (x + xOffset < width * 4) ) {
+				//console.log(`xOffset = ${xOffset}, position in chunk: ${(x + xOffset) + width * 4 * y}`);
 				chunk.push(pixels[ (x + xOffset) + width * 4 * y ]);	
-				++xOffset;
+				xOffset++;
+				if (!(x + xOffset < width * 4)) console.log('break!');
 			}
-			console.log('chunk: ', chunk);
+			//console.log('chunk: ', chunk);
 			if (y % scale === 0 || y === height - 1) {
 				let character = mean(chunk, gradient);
 				result[ x / 4 + width * y ] = character;
-				console.log('result: ', result, 'result position: ', x / 4 + width * y, 'character: ', character);
+				//console.log('result: ', result, 'result position: ', x / 4 + width * y, 'character: ', character);
 				chunk.length = 0;
 			}
 			y += 1;
@@ -75,11 +80,11 @@ function toASCII(pixels, width, height, scale, gradient, mode) {
 	}
 	result = result.join('')
 	let position = 0;
-	for (let i = 1; i < Math.round(height / scale); ++i) {
-		position = i * (Math.floor(width / scale) + width % scale) + (i - 1);
+	for (let i = 1; i <= Math.ceil(height / scale); i++) {
+		position = i * (Math.ceil(width / scale)) + (i - 1);
 		result = result.substring(0, position) + '\n' + result.substring(position);
 	}
-	console.log(result);
+	//console.log(result);
 	return result;
 }
 
@@ -88,12 +93,12 @@ function toHTML(ASCII) {
 	ASCII = ASCII.split('\n')
 	return ASCII.map( (row) => {
 		let editedRow = ''
-		console.log(row);
+		//console.log(row);
 		for (let i = 0; i < row.length; i++){
-			console.log(row[i]);
+			//console.log(row[i]);
 			editedRow += '<span>' + row[i] + '</span>';
 		}
-		console.log(editedRow);
+		//console.log(editedRow);
 		return '<div>' + editedRow + '</div>';
 	} ).join('');
 }
@@ -110,7 +115,6 @@ function mean(chunk, gradient) {
 
 async function uploadHandler(event){
 	file = event.target.files[0];
-	console.log(file);
 	event.target.parentElement.style.display = "none";
 	process(file);
 }

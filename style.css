@@ -222,5 +222,6 @@ label.checkbox {
 }
 .output > p > div > span {
 	background-color: var(--bg-color);
+	flex: 1;
 }
 
