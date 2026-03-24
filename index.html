@@ -16,17 +16,38 @@
 				<input type="file" id="imgInput">
 			</label>
 			<form class="input">
-				<input type="text" id="gradient" spellcheck="false" placeholder="" />
 				<div>
-					<input type="radio" name="mode" value="mean" />
+					<h3>Shading gradient</h3>
+					<input type="text" id="gradient" spellcheck="false" placeholder="" />
 				</div>
 				<div>
-					<input type="checkbox" name="gradient" />
-					<input type="checkbox" name="outline" />
+					<h3>Resize factor</h3>
+					<p>CAREFUL, setting it to a low value is not recomended, as it might cause significant lag. Should be kept at 7 or above for HD images and higher for greater resolution</p>
+					<input type="range" value="scale" min="1" max="50" />
 				</div>
-				<div class="input__submit">
-					<input type="submit" />
+				<div>
+					<h3>Processing algorithm</h3>
+					<span>
+						<input type="radio" name="mode" value="mean" id="meanmode" checked/>
+						<label for="meanmode" class="checkbox">Mean</label>
+					</span>
+						
 				</div>
+				<div>
+					<h3>Shading/outline</h3>
+					<span>
+						<input type="checkbox" name="gradient" id="gradientmode"checked/>
+						<label for="gradientmode" class="checkbox">Gradient</label>
+					</span>
+					<span>
+						<input type="checkbox" name="outline" id="outlinemode" />
+						<label for="outlinemode" class="checkbox">Outline</label>
+					</span>
+				</div>
+					<label class="input__submit">
+						GENERATE
+						<input type="submit" />
+					</label>
 
 			</form>
 			<div class="output">
