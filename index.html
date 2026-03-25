@@ -29,7 +29,10 @@
 				<div>
 					<h3>Downscale factor</h3>
 					<p>CAREFUL, setting it to a low value is not recomended, as it might cause significant lag. Should be kept at 7 or above for HD images and higher for greater resolution</p>
-					<input type="range" step="1" id="scale" name="scale" min="1" max="50" />
+					<div class="input__row">
+						<input type="range" step="1" id="scale" name="scale" min="1" max="50" />
+						<span id="rangeDisplay" class="range__output"></span>
+					</div>
 				</div>
 				<div>
 					<h3>Processing algorithm</h3>

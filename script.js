@@ -51,6 +51,9 @@ gradientInput.placeholder = settings.gradient;
 let scaleInput = document.getElementById('scale');
 const submit = document.getElementById('submit-button');
 submit.addEventListener('click', (e) => { e.preventDefault(); settings.update(e.target.form); process(settings.file); })
+let rangeDisplay = document.getElementById('rangeDisplay');
+rangeDisplay.textContent = scaleInput.value;
+scaleInput.addEventListener('input', (e) => { rangeDisplay.textContent = e.target.value })
 
 const worker = new Worker('formatpixels.js');
 
