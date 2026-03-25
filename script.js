@@ -54,6 +54,7 @@ submit.addEventListener('click', (e) => { e.preventDefault(); settings.update(e.
 let rangeDisplay = document.getElementById('rangeDisplay');
 rangeDisplay.textContent = scaleInput.value;
 scaleInput.addEventListener('input', (e) => { rangeDisplay.textContent = e.target.value })
+window.addEventListener('resize', (e) => { output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / settings.scale) + "px"; })
 
 const worker = new Worker('formatpixels.js');
 

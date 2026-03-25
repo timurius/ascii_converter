@@ -208,16 +208,15 @@ label.checkbox {
 	gap: 20px;
 }
 .output {
-	display: flex;
 	position: relative;
-	align-content: center;
-	justify-content: center;
 }
 .output > * {
 	position: absolute;
 	width: 100%;
 	margin: 0px;
 	padding: 0px;
+	top: 50%;
+	transform: translate(0%, -50%);
 }
 .output > p {
 	display: flex;
