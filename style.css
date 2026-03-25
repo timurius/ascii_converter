@@ -81,7 +81,7 @@ input[type="range"]::-ms-track {
 	overflow-y: scroll;
 	overflow-x: hidden;
 }
-.input > div > input[type="text"] {
+.input input[type="text"] {
 	background-color: var(--bg-color);
 	color: var(--main-color);
 	border: solid calc(var(--border-width) / 2) var(--main-color);
@@ -188,6 +188,11 @@ label.checkbox {
 	padding-bottom: 20px;
 	margin-bottom: 20px;
 }
+.input span {
+	display: inline-flex;
+	align-content: center;
+	flex-wrap: wrap;
+}
 .input > div:first-child {
 	margin-top: 20px;
 }
@@ -195,7 +200,10 @@ label.checkbox {
 	margin: 0px;
 	margin-bottom: 5px;
 }
-
+.input__row {
+	display: flex;
+	gap: 20px;
+}
 .output {
 	display: flex;
 	position: relative;

@@ -18,12 +18,18 @@
 			<form class="input" id="settings">
 				<div>
 					<h3>Shading gradient</h3>
-					<input type="text" id="gradient" name="gradient" spellcheck="false" placeholder="" />
+					<div class="input__row">
+						<input type="text" id="gradient" name="gradient" spellcheck="false" placeholder="" />
+						<span>
+							<input type="checkbox" name="invertGradient" id="invertGradient"/>
+							<label for="invertGradient" class="checkbox">Invert</label>
+						</span>
+					</div>
 				</div>
 				<div>
 					<h3>Downscale factor</h3>
 					<p>CAREFUL, setting it to a low value is not recomended, as it might cause significant lag. Should be kept at 7 or above for HD images and higher for greater resolution</p>
-					<input type="range" step="1" id="scale" value="scale" min="1" max="50" />
+					<input type="range" step="1" id="scale" name="scale" min="1" max="50" />
 				</div>
 				<div>
 					<h3>Processing algorithm</h3>
@@ -36,7 +42,7 @@
 				<div>
 					<h3>Shading/outline</h3>
 					<span>
-						<input type="checkbox" name="shading" id="shadeing" checked/>
+						<input type="checkbox" name="shading" id="shading" checked/>
 						<label for="shading" class="checkbox">Gradient</label>
 					</span>
 					<span>

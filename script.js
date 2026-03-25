@@ -9,11 +9,35 @@ let settings = {
 	'shading': true,
 	'outline': false,
 	'densityControl': 'space-between',
+	'invertGradient': false,
 	update(form) {
-		for (let key in this) {
-			if (form[key] != undefined) this[key] = form[key].value;
+		form = Object.fromEntries(new FormData(form));
+		this.scale = form.scale;
+		this.gradient = form.gradient == undefined ? this.defaultgradient : form.gradient;
+		this.mode = form.mode;
+		if (form.shading === 'on') {
+			this.shading = true;
+		} else {
+			this.shading = false;
+		}
+		if (form.outline === 'on') {
+			this.outline = true;
+		} else {
+			this.outline = false;
+		}
+		if (form.invertGradient === 'on') {
+			this.invertGradient= true;
+		} else {
+			this.invertGradient = false;
 		}
 		if (this.gradient == '') this.gradient = this.gradientDefault; 
+		if (this.invertGradient) {
+			let y = 0;
+			for (let x = 0; x < Math.floor(this.gradient.length / 2); ++x) {
+				y = this.gradient.length - x - 1;
+				this.gradient = this.gradient.substring(0, x) + this.gradient[y] + this.gradient.substring(x + 1, y) + this.gradient[x] + this.gradient.substring(y + 1);
+			}
+		}
 	}
 };
 
