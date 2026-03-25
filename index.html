@@ -15,10 +15,10 @@
 				Drop an image, or click to upload
 				<input type="file" id="imgInput">
 			</label>
-			<form class="input">
+			<form class="input" id="settings">
 				<div>
 					<h3>Shading gradient</h3>
-					<input type="text" id="gradient" spellcheck="false" placeholder="" />
+					<input type="text" id="gradient" name="gradient" spellcheck="false" placeholder="" />
 				</div>
 				<div>
 					<h3>Downscale factor</h3>
@@ -36,15 +36,15 @@
 				<div>
 					<h3>Shading/outline</h3>
 					<span>
-						<input type="checkbox" name="gradient" id="gradientmode"checked/>
-						<label for="gradientmode" class="checkbox">Gradient</label>
+						<input type="checkbox" name="shading" id="shadeing" checked/>
+						<label for="shading" class="checkbox">Gradient</label>
 					</span>
 					<span>
-						<input type="checkbox" name="outline" id="outlinemode" />
-						<label for="outlinemode" class="checkbox">Outline</label>
+						<input type="checkbox" name="outline" id="outline" />
+						<label for="outline" class="checkbox">Outline</label>
 					</span>
 				</div>
-					<label class="input__submit">
+					<label class="input__submit" id="submit-button">
 						GENERATE
 						<input type="submit" />
 					</label>

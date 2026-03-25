@@ -1,19 +1,32 @@
 "use strict";
-let file;
+
+let settings = {
+	'gradientDefault': `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'. `,
+	'scale': 8,
+	'gradient': `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'. `,
+	'file': undefined,
+	'mode': 'mean',
+	'shading': true,
+	'outline': false,
+	'densityControl': 'space-between',
+	update(form) {
+		for (let key in this) {
+			if (form[key] != undefined) this[key] = form[key].value;
+		}
+		if (this.gradient == '') this.gradient = this.gradientDefault; 
+	}
+};
+
 let imgInput = document.getElementById('imgInput');
 imgInput.addEventListener('change', uploadHandler);
 const imgDropZone = document.getElementById('imgDropZone');
 let cvs = document.getElementById('preview');
-let gradient = `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'. `;
-let gradientInput = document.getElementById('gradient');
 let output = document.getElementById('txtOutput');
-gradientInput.placeholder = gradient;
-gradientInput.addEventListener('change', (e) => {gradient = e.target.value});
+let gradientInput = document.getElementById('gradient');
+gradientInput.placeholder = settings.gradient;
 let scaleInput = document.getElementById('scale');
-let scale = 8;
-scaleInput.addEventListener('change', (e) => {
-	scale = e.target.value;
-});
+const submit = document.getElementById('submit-button');
+submit.addEventListener('click', (e) => { e.preventDefault(); settings.update(e.target.form); process(settings.file); })
 
 const worker = new Worker('formatpixels.js');
 
@@ -24,9 +37,9 @@ async function process(file) {
 		img = await readImg(file);
 		ctx = loadImg(img, cvs);
 		pixels = toPixels(ctx, cvs.width, cvs.height);
-		ASCII = toASCII(pixels, cvs.width, cvs.height, scale, gradient, mean);
+		ASCII = toASCII(pixels, cvs.width, cvs.height, settings.scale, settings.gradient, settings.mode);
 		HTML = toHTML(ASCII);
-		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / scale) + "px";
+		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / settings.scale) + "px";
 		output.innerHTML = HTML;  
 	}
 }
@@ -61,7 +74,7 @@ function toASCII(pixels, width, height, scale, gradient, mode) {
 				xOffset++;
 			}
 			if (y % scale === 0 || y === height - 1) {
-				let character = mean(chunk, gradient);
+				let character = modes[mode](chunk, gradient);
 				result[ x / 4 + width * y ] = character;
 				chunk.length = 0;
 			}
@@ -90,26 +103,27 @@ function toHTML(ASCII) {
 	} ).join('');
 }
 
-function mean(chunk, gradient) {
-	let character = '';
-	let total = 0;
-	for (let i = 0; i < chunk.length; i += 4){
-		total = total + (chunk[i] + chunk[i + 1] + chunk[i + 2]);
+const modes = {
+	mean(chunk, gradient) {
+		let character = '';
+		let total = 0;
+		for (let i = 0; i < chunk.length; i += 4){
+			total = total + (chunk[i] + chunk[i + 1] + chunk[i + 2]);
+		}
+		const average = total / 3 / ( chunk.length / 4 );
+		return gradient[ Math.floor(average / (255 / (gradient.length - 1))) ];
 	}
-	const average = total / 3 / ( chunk.length / 4 );
-	return gradient[ Math.floor(average / (255 / (gradient.length - 1))) ];
 }
-
 async function uploadHandler(event){
-	file = event.target.files[0];
+	settings.file = event.target.files[0];
 	event.target.parentElement.style.display = "none";
-	process(file);
+	process(settings.file);
 }
 
 function dropHandler(event) {
-	file = [...event.dataTransfer.files][0];	
+	settings.file = [...event.dataTransfer.files][0];	
 	event.target.style.display = "none";
-	process(file);
+	process(settings.file);
 }
 
 window.addEventListener("drop", (e) => {
