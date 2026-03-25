@@ -24,9 +24,7 @@ async function process(file) {
 		img = await readImg(file);
 		ctx = loadImg(img, cvs);
 		pixels = toPixels(ctx, cvs.width, cvs.height);
-		console.log(pixels);
 		ASCII = toASCII(pixels, cvs.width, cvs.height, scale, gradient, mean);
-		console.log(ASCII);
 		HTML = toHTML(ASCII);
 		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / scale) + "px";
 		output.innerHTML = HTML;  
@@ -51,27 +49,20 @@ function toPixels(ctx, width, height){
 }
 
 function toASCII(pixels, width, height, scale, gradient, mode) {
-	//console.log(`pixels = ${pixels}, width = ${width}, height = ${height}, scale = ${scale}, gradient = ${gradient}, mode = ${mode}`);
 	let result = Array(Math.ceil((width / scale) * (height / scale)));
 	let x = 0, y = 0, xOffset = 0, chunk = []; 
 	while (x < width * 4) {
 		y = 0;
 		chunk.length = 0;
-		//console.log(`x = ${x}`);
 		while (y < height) {
 			xOffset = 0;
-			//console.log(`y = ${y}`);
 			while ( (xOffset < scale * 4) && (x + xOffset < width * 4) ) {
-				//console.log(`xOffset = ${xOffset}, position in chunk: ${(x + xOffset) + width * 4 * y}`);
 				chunk.push(pixels[ (x + xOffset) + width * 4 * y ]);	
 				xOffset++;
-				if (!(x + xOffset < width * 4)) console.log('break!');
 			}
-			//console.log('chunk: ', chunk);
 			if (y % scale === 0 || y === height - 1) {
 				let character = mean(chunk, gradient);
 				result[ x / 4 + width * y ] = character;
-				//console.log('result: ', result, 'result position: ', x / 4 + width * y, 'character: ', character);
 				chunk.length = 0;
 			}
 			y += 1;
@@ -84,7 +75,6 @@ function toASCII(pixels, width, height, scale, gradient, mode) {
 		position = i * (Math.ceil(width / scale)) + (i - 1);
 		result = result.substring(0, position) + '\n' + result.substring(position);
 	}
-	//console.log(result);
 	return result;
 }
 
@@ -93,12 +83,9 @@ function toHTML(ASCII) {
 	ASCII = ASCII.split('\n')
 	return ASCII.map( (row) => {
 		let editedRow = ''
-		//console.log(row);
 		for (let i = 0; i < row.length; i++){
-			//console.log(row[i]);
 			editedRow += '<span>' + row[i] + '</span>';
 		}
-		//console.log(editedRow);
 		return '<div>' + editedRow + '</div>';
 	} ).join('');
 }
