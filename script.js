@@ -139,7 +139,7 @@ const modes = {
 			total = total + (chunk[i] + chunk[i + 1] + chunk[i + 2]);
 		}
 		const average = total / 3 / ( chunk.length / 4 );
-		return gradient[ Math.floor(average / (255 / (gradient.length - 1))) ];
+		return gradient[ Math.floor( (gradient.length - 1) * average / 255) ];
 	}
 }
 async function uploadHandler(event){
