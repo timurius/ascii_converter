@@ -61,16 +61,16 @@ window.addEventListener('resize', (e) => { output.style['font-size'] = output.of
 const worker = new Worker('formatpixels.js');
 
 async function process(file) {
-	let img, ctx, pixels, ASCII, HTML;
+	let img, ctx, pixels, asciiMap, colorMap, htmlCode;
 
 	if (file.type.startsWith("image")) {
 		img = await readImg(file);
 		ctx = loadImg(img, cvs);
 		pixels = toPixels(ctx, cvs.width, cvs.height);
-		ASCII = toASCII(pixels, cvs.width, cvs.height, settings.scale, settings.gradient, settings.mode);
-		HTML = toHTML(ASCII);
+		let [asciiMap, colorMap] = toMap(pixels, cvs.width, cvs.height, settings.scale, settings.gradient, settings.mode);
+		htmlCode = toHtml(asciiMap, colorMap, Math.ceil(cvs.width / settings.scale));
 		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / settings.scale) + "px";
-		output.innerHTML = HTML;  
+		output.innerHTML = htmlCode;  
 	}
 }
 
@@ -91,8 +91,10 @@ function toPixels(ctx, width, height){
 	return ctx.getImageData(0, 0, width, height).data;
 }
 
-function toASCII(pixels, width, height, scale, gradient, mode, colormode) {
-	let result = Array(Math.ceil((width / scale) * (height / scale)));
+function toMap(pixels, width, height, scale, gradient, mode, colormode) {
+	console.log('Processing');
+	let characterMap = new Array(Math.ceil(width / scale / 4) * Math.ceil(height / scale / 4));
+	let colorMap = new Array(Math.ceil(width / scale / 4) * Math.ceil(height / scale / 4));
 	let x = 0, y = 0, xOffset = 0, chunk = []; 
 	while (x < width * 4) {
 		y = 0;
@@ -106,32 +108,34 @@ function toASCII(pixels, width, height, scale, gradient, mode, colormode) {
 			if (y % scale === 0 || y === height - 1) {
 				let character = modes[mode](chunk, gradient);
 				let color = colormodes[settings.colormode] ? colormodes[settings.colormode](chunk) : undefined;
-				result[ x / 4 + width * y ] = character;
+				characterMap[ x / 4 + width * y ] = character;
+				colorMap[ x / 4 + width * y ] = color;
 				chunk.length = 0;
 			}
 			y += 1;
 		}
 		x += scale * 4;
 	}
-	result = result.join('')
-	let position = 0;
-	for (let i = 1; i <= Math.ceil(height / scale); i++) {
-		position = i * (Math.ceil(width / scale)) + (i - 1);
-		result = result.substring(0, position) + '\n' + result.substring(position);
-	}
-	return result;
+	return [characterMap, colorMap];
 }
 
-function toHTML(ASCII) {
-	let result = '';
-	ASCII = ASCII.split('\n')
-	return ASCII.map( (row) => {
-		let editedRow = ''
-		for (let i = 0; i < row.length; i++){
-			editedRow += '<span>' + row[i] + '</span>';
+function toHtml(asciiMap, colorMap, width) {
+	console.log('Converting to html');
+	console.log(asciiMap);
+	console.log(colorMap);
+	console.log(width);
+	let result = '<div class="output__row">';
+	for (let i = 0; i < asciiMap.length; i++){
+		if (i % width === 0 && i != 0 && i + width != asciiMap.length - 1){
+			result += '</div><div class="output__row">';
 		}
-		return '<div>' + editedRow + '</div>';
-	} ).join('');
+		else if (i + width === asciiMap.length){
+			result += '</div>';
+		}
+		let hexColor = rgbToHex(colorMap[i]);
+		result += colorMap.length > 0 ? `<span class="output_char" style="color: #${hexColor};">${asciiMap[i]}</span>` : `<span class="output_char">${asciiMap[i]}</span>`;
+	}
+	return result;
 }
 
 const modes = {
@@ -142,23 +146,21 @@ const modes = {
 			total = total + (chunk[i] + chunk[i + 1] + chunk[i + 2]);
 		}
 		const average = total / 3 / ( chunk.length / 4 );
-		return gradient[ Math.floor( (gradient.length - 1) * average / 255) ];
+		return gradient[ Math.round( (gradient.length - 1) * average / 255) ];
 	}
 }
 const colormodes = {
 	dominant(chunk) {
-		console.log(chunk.toString());
 		let colors = {};
 		for (let i = 0; i < chunk.length; i += 4){
 			let rgb = new Array();
 			for (let x = 0; x < 3; x++){
 				let value = chunk[i + x].toString();
-				rgb[x] = ('000' + value).slice(-3, value.length + 3);
+				rgb[x] = fillFront(value, '0', 3);
 			}
 			let color = rgb.join('');
 			colors[color] = colors[color] ? colors[color] + 1 : 1;
 		}
-		console.log(colors);
 		let dominantColor;
 		for (let color in colors) {
 			dominantColor = color;
@@ -169,10 +171,24 @@ const colormodes = {
 				dominantColor = colors[color];
 			}
 		}
-		console.log(dominantColor);
 		return dominantColor;
 	}
 }
+
+function fillFront(str, chr, length){
+	return ((new Array(length)).fill(chr).join('') + str).slice( -length, str.length + length );
+}
+
+function rgbToHex(rgb){
+	if (rgb) {
+		let result = '';
+		for (let i = 0; i < rgb.length; i += 3){
+			result += fillFront(parseInt(rgb.substring(i, i + 3)).toString(16), '0', 2);
+		}
+		return result;
+	}
+}
+
 async function uploadHandler(event){
 	settings.file = event.target.files[0];
 	event.target.parentElement.style.display = "none";
