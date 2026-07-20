@@ -6,6 +6,7 @@ let settings = {
 	'gradient': `$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^\`'. `,
 	'file': undefined,
 	'mode': 'mean',
+	'colormode' : 'mono',
 	'shading': true,
 	'outline': false,
 	'densityControl': 'space-between',
@@ -15,6 +16,7 @@ let settings = {
 		this.scale = form.scale;
 		this.gradient = form.gradient == undefined ? this.defaultgradient : form.gradient;
 		this.mode = form.mode;
+		this.colormode = form.colormode;
 		if (form.shading === 'on') {
 			this.shading = true;
 		} else {
@@ -89,7 +91,7 @@ function toPixels(ctx, width, height){
 	return ctx.getImageData(0, 0, width, height).data;
 }
 
-function toASCII(pixels, width, height, scale, gradient, mode) {
+function toASCII(pixels, width, height, scale, gradient, mode, colormode) {
 	let result = Array(Math.ceil((width / scale) * (height / scale)));
 	let x = 0, y = 0, xOffset = 0, chunk = []; 
 	while (x < width * 4) {
@@ -103,6 +105,7 @@ function toASCII(pixels, width, height, scale, gradient, mode) {
 			}
 			if (y % scale === 0 || y === height - 1) {
 				let character = modes[mode](chunk, gradient);
+				let color = colormodes[settings.colormode] ? colormodes[settings.colormode](chunk) : undefined;
 				result[ x / 4 + width * y ] = character;
 				chunk.length = 0;
 			}
@@ -140,6 +143,34 @@ const modes = {
 		}
 		const average = total / 3 / ( chunk.length / 4 );
 		return gradient[ Math.floor( (gradient.length - 1) * average / 255) ];
+	}
+}
+const colormodes = {
+	dominant(chunk) {
+		console.log(chunk.toString());
+		let colors = {};
+		for (let i = 0; i < chunk.length; i += 4){
+			let rgb = new Array();
+			for (let x = 0; x < 3; x++){
+				let value = chunk[i + x].toString();
+				rgb[x] = ('000' + value).slice(-3, value.length + 3);
+			}
+			let color = rgb.join('');
+			colors[color] = colors[color] ? colors[color] + 1 : 1;
+		}
+		console.log(colors);
+		let dominantColor;
+		for (let color in colors) {
+			dominantColor = color;
+			break;
+		}
+		for (let color in colors) {
+			if (colors[color] > colors[dominantColor]) {
+				dominantColor = colors[color];
+			}
+		}
+		console.log(dominantColor);
+		return dominantColor;
 	}
 }
 async function uploadHandler(event){
