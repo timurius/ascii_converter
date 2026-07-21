@@ -12,7 +12,7 @@ let settings = {
 	'densityControl': 'space-between',
 	'invertGradient': false,
 	update(form) {
-		form = Object.fromEntries(new FormData(form));
+		form = Object.fromEntries(new FormData(form))
 		this.scale = form.scale;
 		this.gradient = form.gradient == undefined ? this.defaultgradient : form.gradient;
 		this.mode = form.mode;
@@ -93,8 +93,8 @@ function toPixels(ctx, width, height){
 
 function toMap(pixels, width, height, scale, gradient, mode, colormode) {
 	console.log('Processing');
-	let characterMap = new Array(Math.ceil(width / scale / 4) * Math.ceil(height / scale / 4));
-	let colorMap = new Array(Math.ceil(width / scale / 4) * Math.ceil(height / scale / 4));
+	let characterMap = new Array();
+	let colorMap = new Array();
 	let x = 0, y = 0, xOffset = 0, chunk = []; 
 	while (x < width * 4) {
 		y = 0;
@@ -108,8 +108,8 @@ function toMap(pixels, width, height, scale, gradient, mode, colormode) {
 			if (y % scale === 0 || y === height - 1) {
 				let character = modes[mode](chunk, gradient);
 				let color = colormodes[settings.colormode] ? colormodes[settings.colormode](chunk) : undefined;
-				characterMap[ x / 4 + width * y ] = character;
-				colorMap[ x / 4 + width * y ] = color;
+				characterMap[ Math.ceil(x / scale / 4) + Math.ceil(width / scale) * Math.ceil(y / scale) ] = character;
+				colorMap[ Math.ceil(x / scale / 4) + Math.ceil(width / scale) * Math.ceil(y / scale) ] = color;
 				chunk.length = 0;
 			}
 			y += 1;
@@ -168,7 +168,7 @@ const colormodes = {
 		}
 		for (let color in colors) {
 			if (colors[color] > colors[dominantColor]) {
-				dominantColor = colors[color];
+				dominantColor = color;
 			}
 		}
 		return dominantColor;
