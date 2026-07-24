@@ -48,6 +48,7 @@ imgInput.addEventListener('change', uploadHandler);
 const imgDropZone = document.getElementById('imgDropZone');
 let cvs = document.getElementById('preview');
 let output = document.getElementById('txtOutput');
+let outputContainer = document.getElementById('outputContainer');
 let gradientInput = document.getElementById('gradient');
 gradientInput.placeholder = settings.gradient;
 let scaleInput = document.getElementById('scale');
@@ -66,6 +67,11 @@ async function process(file) {
 	if (file.type.startsWith("image")) {
 		img = await readImg(file);
 		ctx = loadImg(img, cvs);
+
+		for (let i = 0; i < outputContainer.children.length; i++) {
+			outputContainer.children[i].style.aspectRatio = `${cvs.width}/${cvs.height}`;
+		}
+
 		pixels = toPixels(ctx, cvs.width, cvs.height);
 		let [asciiMap, colorMap] = toMap(pixels, cvs.width, cvs.height, settings.scale, settings.gradient, settings.mode);
 		htmlCode = toHtml(asciiMap, colorMap, Math.ceil(cvs.width / settings.scale));
