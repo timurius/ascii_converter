@@ -15,65 +15,67 @@
 				Drop an image, or click to upload
 				<input type="file" id="imgInput">
 			</label>
-			<form class="input" id="settings">
-				<div>
-					<h3>Shading gradient</h3>
-					<div class="input__row">
-						<input type="text" id="gradient" name="gradient" spellcheck="false" placeholder="" />
+			<div class="input">
+				<form class="input_settings" id="settings">
+					<div>
+						<h3>Shading gradient</h3>
+						<div class="input__row">
+							<input type="text" id="gradient" name="gradient" spellcheck="false" placeholder="" />
+							<span>
+								<input type="checkbox" name="invertGradient" id="invertGradient"/>
+								<label for="invertGradient" class="checkbox">Invert</label>
+							</span>
+						</div>
+					</div>
+					<div>
+						<h3>Downscale factor</h3>
+						<p>CAREFUL, setting it to a low value is not recomended, as it might cause significant lag. Should be kept at 7 or above for HD images and higher for greater resolution</p>
+						<div class="input__row">
+							<input type="range" step="1" id="scale" name="scale" min="1" max="50" />
+							<span id="rangeDisplay" class="range__output"></span>
+						</div>
+					</div>
+					<div>
+						<h3>Shading algorithm</h3>
 						<span>
-							<input type="checkbox" name="invertGradient" id="invertGradient"/>
-							<label for="invertGradient" class="checkbox">Invert</label>
+							<input type="radio" name="mode" value="mean" id="meanmode" checked/>
+							<label for="meanmode" class="checkbox">Mean</label>
+						</span>
+							
+					</div>
+					<div>
+						<h3>Color mode</h3>
+						<span>
+							<input type="radio" name="colormode" value="mono" id="monocolor" checked/>
+							<label for="monocolor" class="checkbox">Mono</label>
+						</span>
+						<span>
+							<input type="radio" name="colormode" value="dominant" id="dominantcolor" />
+							<label for="dominantcolor" class="checkbox">Dominant</label>
+						</span>
+						<span>
+							<input type="radio" name="colormode" value="mean" id="meancolor" />
+							<label for="meancolor" class="checkbox">Mean</label>
 						</span>
 					</div>
-				</div>
-				<div>
-					<h3>Downscale factor</h3>
-					<p>CAREFUL, setting it to a low value is not recomended, as it might cause significant lag. Should be kept at 7 or above for HD images and higher for greater resolution</p>
-					<div class="input__row">
-						<input type="range" step="1" id="scale" name="scale" min="1" max="50" />
-						<span id="rangeDisplay" class="range__output"></span>
+					<div>
+						<h3>Shading/outline</h3>
+						<span>
+							<input type="checkbox" name="shading" id="shading" checked/>
+							<label for="shading" class="checkbox">Gradient</label>
+						</span>
+						<span>
+							<input type="checkbox" name="outline" id="outline" />
+							<label for="outline" class="checkbox">Outline</label>
+						</span>
 					</div>
-				</div>
-				<div>
-					<h3>Shading algorithm</h3>
-					<span>
-						<input type="radio" name="mode" value="mean" id="meanmode" checked/>
-						<label for="meanmode" class="checkbox">Mean</label>
-					</span>
-						
-				</div>
-				<div>
-					<h3>Color mode</h3>
-					<span>
-						<input type="radio" name="colormode" value="mono" id="monocolor" checked/>
-						<label for="monocolor" class="checkbox">Mono</label>
-					</span>
-					<span>
-						<input type="radio" name="colormode" value="dominant" id="dominantcolor" />
-						<label for="dominantcolor" class="checkbox">Dominant</label>
-					</span>
-					<span>
-						<input type="radio" name="colormode" value="mean" id="meancolor" />
-						<label for="meancolor" class="checkbox">Mean</label>
-					</span>
-				</div>
-				<div>
-					<h3>Shading/outline</h3>
-					<span>
-						<input type="checkbox" name="shading" id="shading" checked/>
-						<label for="shading" class="checkbox">Gradient</label>
-					</span>
-					<span>
-						<input type="checkbox" name="outline" id="outline" />
-						<label for="outline" class="checkbox">Outline</label>
-					</span>
-				</div>
-					<label class="input__submit" id="submit-button">
-						GENERATE
-						<input type="submit" />
-					</label>
+						<input type="submit" id="submit-input"/>
 
-			</form>
+				</form>
+				<label class="input__submit" id="submit-button">
+					GENERATE
+				</label>
+			</div>
 			<div class="output">
 				<div class="output__container" id="outputContainer">
 					<canvas id="preview"></canvas>

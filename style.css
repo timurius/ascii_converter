@@ -78,8 +78,14 @@ input[type="range"]::-ms-track {
 }
 .input {
 	position: relative;
-	overflow-y: scroll;
+	overflow-y: hidden;
 	overflow-x: hidden;
+}
+.input > form {
+	position: relative;
+	overflow-y: scroll;
+	height: calc(100% - 2em - 20px);
+	box-sizing: border-box;
 }
 .input input[type="text"] {
 	background-color: var(--bg-color);
@@ -161,22 +167,23 @@ input[type="checkbox"]:checked + label.checkbox, input[type="radio"]:checked + l
 	text-decoration: underline 2px;
 	text-underline-offset: 3px;
 }
+.input input[type="submit"] {
+	display: none;
+}
 label.checkbox {
 	font-size: 16px;
 	text-transform: uppercase;
 	cursor: pointer;
 }
 .input__submit {
-	height: 10%;
 	width: 100%;
+	padding: 5px 0px;
 	background-color: var(--main-color);
 	color: var(--bg-color);
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
 	align-content: center;
-	position: absolute;
-	bottom: 0px;
 	font-size: 2em;
 	font-weight: 300;
 }
@@ -246,5 +253,21 @@ label.checkbox {
 .output__container > p > div > span {
 	background-color: var(--bg-color);
 	flex: 1;
+}
+@media(orientation: portrait){
+	.container {
+		width: 95%;
+		height: 95%;
+	}
+	.window {
+		flex-direction: column;
+	}
+	.window > * {
+		border: none;
+	}
+	.input > form {
+		padding: 0px 5px;
+		padding-bottom: 10px;
+	}
 }
 
