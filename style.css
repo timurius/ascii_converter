@@ -71,7 +71,7 @@ input[type="range"]::-ms-track {
 	align-content: center;
 	flex-direction: column;
 	text-align: center;
-	z-index: 2;
+	z-index: 3;
 }
 .input_file > input {
 	display: none;
@@ -260,10 +260,13 @@ label.checkbox {
 		height: 95%;
 	}
 	.window {
-		flex-direction: column;
+		flex-direction: column-reverse;
 	}
 	.window > * {
-		border: none;
+		border-width: calc(var(--border-width) / 2) 0px 0px 0px;	
+	}
+	.window > *:last-child {
+		border-width: 0px 0px calc(var(--border-width) / 2) 0px;	
 	}
 	.input > form {
 		padding: 0px 5px;
