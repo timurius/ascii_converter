@@ -43,6 +43,22 @@ let settings = {
 	}
 };
 
+class Ascii {
+	constructor(map = [], colorMap = []) {
+		this.map = map; 
+		this.colorMap = colorMap;
+		this.text = "";
+		this.html = "";
+	}
+	toString() {
+
+	}
+	toHtml() {
+
+	}
+}
+	
+
 let imgInput = document.getElementById('imgInput');
 imgInput.addEventListener('change', uploadHandler);
 const imgDropZone = document.getElementById('imgDropZone');
