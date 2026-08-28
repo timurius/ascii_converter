@@ -54,7 +54,18 @@ class Ascii {
 
 	}
 	toHtml() {
-
+		let result = '<div class="output__row">';
+		for (let i = 0; i < this.map.length; i++){
+			if (i % canvas.width === 0 && i != 0 && i + canvas.width != this.map.length - 1){
+				result += '</div><div class="output__row">';
+			}
+			else if (i + canvas.width === this.map.length){
+				result += '</div>';
+			}
+			let hexColor = rgbToHex(this.colorMap[i]);
+			result += this.colorMap.length > 0 ? `<span class="output_char" style="color: #${hexColor};">${this.map[i]}</span>` : `<span class="output_char">${this.map[i]}</span>`;
+		}
+		return result;
 	}
 }
 	
@@ -167,26 +178,6 @@ async function process(file) {
 		output.innerHTML = ascii.toHtml();  
 	}
 }
-
-function toHtml(asciiMap, colorMap, width) {
-	console.log('Converting to html');
-	console.log(asciiMap);
-	console.log(colorMap);
-	console.log(width);
-	let result = '<div class="output__row">';
-	for (let i = 0; i < asciiMap.length; i++){
-		if (i % width === 0 && i != 0 && i + width != asciiMap.length - 1){
-			result += '</div><div class="output__row">';
-		}
-		else if (i + width === asciiMap.length){
-			result += '</div>';
-		}
-		let hexColor = rgbToHex(colorMap[i]);
-		result += colorMap.length > 0 ? `<span class="output_char" style="color: #${hexColor};">${asciiMap[i]}</span>` : `<span class="output_char">${asciiMap[i]}</span>`;
-	}
-	return result;
-}
-
 
 function fillFront(str, chr, length){
 	return ((new Array(length)).fill(chr).join('') + str).slice( -length, str.length + length );
