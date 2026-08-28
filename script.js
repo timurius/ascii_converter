@@ -58,6 +58,76 @@ class Ascii {
 	}
 }
 	
+function convertDecorator(canvas, context) {
+	const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+
+	const modes = {
+		mean(chunk, gradient) {
+			let character = '';
+			let total = 0;
+			for (let i = 0; i < chunk.length; i += 4){
+				total = total + (chunk[i] + chunk[i + 1] + chunk[i + 2]);
+			}
+			const average = total / 3 / ( chunk.length / 4 );
+			return gradient[ Math.round( (gradient.length - 1) * average / 255) ];
+		}
+	}
+
+	const colormodes = {
+		dominant(chunk) {
+			let colors = {};
+			for (let i = 0; i < chunk.length; i += 4){
+				let rgb = new Array();
+				for (let x = 0; x < 3; x++){
+					let value = chunk[i + x].toString();
+					rgb[x] = fillFront(value, '0', 3);
+				}
+				let color = rgb.join('');
+				colors[color] = colors[color] ? colors[color] + 1 : 1;
+			}
+			let dominantColor;
+			for (let color in colors) {
+				dominantColor = color;
+				break;
+			}
+			for (let color in colors) {
+				if (colors[color] > colors[dominantColor]) {
+					dominantColor = color;
+				}
+			}
+			return dominantColor;
+		}
+	}
+
+	return function(settings){
+		console.log('Processing');
+		let characterMap = new Array();
+		let colorMap = new Array();
+		let x = 0, y = 0, xOffset = 0, chunk = []; 
+		while (x < canvas.width * 4) {
+			y = 0;
+			chunk.length = 0;
+			while (y < canvas.height) {
+				xOffset = 0;
+				while ( (xOffset < settings.scale * 4) && (x + xOffset < canvas.width * 4) ) {
+					chunk.push(this.pixels[ (x + xOffset) + canvas.width * 4 * y ]);	
+					xOffset++;
+				}
+				if (y % settings.scale === 0 || y === canvas.height - 1) {
+					let character = this.modes[mode](chunk, settings.gradient);
+					let color = this.colormodes[settings.colormode] ? this.colormodes[settings.colormode](chunk) : undefined;
+					characterMap[ Math.ceil(x / settings.scale / 4) + Math.ceil(canvas.width / scale) * Math.ceil(y / scale) ] = character;
+					colorMap[ Math.ceil(x / settings.scale / 4) + Math.ceil(canvas.width / scale) * Math.ceil(y / scale) ] = color;
+					chunk.length = 0;
+				}
+				y += 1;
+			}
+			x += settings.scale * 4;
+		}
+		return new Ascii(characterMap, colorMap);
+	}
+}
+	
 
 let imgInput = document.getElementById('imgInput');
 imgInput.addEventListener('change', uploadHandler);
@@ -78,67 +148,24 @@ window.addEventListener('resize', (e) => { output.style['font-size'] = output.of
 const worker = new Worker('formatpixels.js');
 
 async function process(file) {
-	let img, ctx, pixels, asciiMap, colorMap, htmlCode;
-
 	if (file.type.startsWith("image")) {
-		img = await readImg(file);
+		img = createImageBitmap(file);
+		canvas.width = img.width;
+		canvas.height = img.height;
 		ctx = loadImg(img, cvs);
+		const ctx = canvas.getContext('2d');
+		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+		let convert = convertDecorator(cvs, ctx);
 
 		for (let i = 0; i < outputContainer.children.length; i++) {
 			outputContainer.children[i].style.aspectRatio = `${cvs.width}/${cvs.height}`;
 		}
-
-		pixels = toPixels(ctx, cvs.width, cvs.height);
-		let [asciiMap, colorMap] = toMap(pixels, cvs.width, cvs.height, settings.scale, settings.gradient, settings.mode);
-		htmlCode = toHtml(asciiMap, colorMap, Math.ceil(cvs.width / settings.scale));
+		
+		let ascii = convert(settings);
 		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / settings.scale) + "px";
-		output.innerHTML = htmlCode;  
+		output.innerHTML = ascii.toHtml();  
 	}
-}
-
-async function readImg(file){
-	const img = await createImageBitmap(file);
-	return img;
-}
-
-function loadImg(img, cvs) {
-	cvs.width = img.width;
-	cvs.height = img.height;
-	let ctx = cvs.getContext('2d');
-	ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
-	return ctx;
-}
-
-function toPixels(ctx, width, height){
-	return ctx.getImageData(0, 0, width, height).data;
-}
-
-function toMap(pixels, width, height, scale, gradient, mode, colormode) {
-	console.log('Processing');
-	let characterMap = new Array();
-	let colorMap = new Array();
-	let x = 0, y = 0, xOffset = 0, chunk = []; 
-	while (x < width * 4) {
-		y = 0;
-		chunk.length = 0;
-		while (y < height) {
-			xOffset = 0;
-			while ( (xOffset < scale * 4) && (x + xOffset < width * 4) ) {
-				chunk.push(pixels[ (x + xOffset) + width * 4 * y ]);	
-				xOffset++;
-			}
-			if (y % scale === 0 || y === height - 1) {
-				let character = modes[mode](chunk, gradient);
-				let color = colormodes[settings.colormode] ? colormodes[settings.colormode](chunk) : undefined;
-				characterMap[ Math.ceil(x / scale / 4) + Math.ceil(width / scale) * Math.ceil(y / scale) ] = character;
-				colorMap[ Math.ceil(x / scale / 4) + Math.ceil(width / scale) * Math.ceil(y / scale) ] = color;
-				chunk.length = 0;
-			}
-			y += 1;
-		}
-		x += scale * 4;
-	}
-	return [characterMap, colorMap];
 }
 
 function toHtml(asciiMap, colorMap, width) {
@@ -160,42 +187,6 @@ function toHtml(asciiMap, colorMap, width) {
 	return result;
 }
 
-const modes = {
-	mean(chunk, gradient) {
-		let character = '';
-		let total = 0;
-		for (let i = 0; i < chunk.length; i += 4){
-			total = total + (chunk[i] + chunk[i + 1] + chunk[i + 2]);
-		}
-		const average = total / 3 / ( chunk.length / 4 );
-		return gradient[ Math.round( (gradient.length - 1) * average / 255) ];
-	}
-}
-const colormodes = {
-	dominant(chunk) {
-		let colors = {};
-		for (let i = 0; i < chunk.length; i += 4){
-			let rgb = new Array();
-			for (let x = 0; x < 3; x++){
-				let value = chunk[i + x].toString();
-				rgb[x] = fillFront(value, '0', 3);
-			}
-			let color = rgb.join('');
-			colors[color] = colors[color] ? colors[color] + 1 : 1;
-		}
-		let dominantColor;
-		for (let color in colors) {
-			dominantColor = color;
-			break;
-		}
-		for (let color in colors) {
-			if (colors[color] > colors[dominantColor]) {
-				dominantColor = color;
-			}
-		}
-		return dominantColor;
-	}
-}
 
 function fillFront(str, chr, length){
 	return ((new Array(length)).fill(chr).join('') + str).slice( -length, str.length + length );
