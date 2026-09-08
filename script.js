@@ -53,13 +53,13 @@ class Ascii {
 	toString() {
 
 	}
-	toHtml() {
+	toHtml(width) {
 		let result = '<div class="output__row">';
 		for (let i = 0; i < this.map.length; i++){
-			if (i % canvas.width === 0 && i != 0 && i + canvas.width != this.map.length - 1){
+			if (i % width === 0 && i != 0 && i + width != this.map.length - 1){
 				result += '</div><div class="output__row">';
 			}
-			else if (i + canvas.width === this.map.length){
+			else if (i + width === this.map.length){
 				result += '</div>';
 			}
 			let hexColor = rgbToHex(this.colorMap[i]);
@@ -70,8 +70,7 @@ class Ascii {
 }
 	
 function convertDecorator(canvas, context) {
-	const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-
+	let pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
 	const modes = {
 		mean(chunk, gradient) {
 			let character = '';
@@ -121,20 +120,22 @@ function convertDecorator(canvas, context) {
 			while (y < canvas.height) {
 				xOffset = 0;
 				while ( (xOffset < settings.scale * 4) && (x + xOffset < canvas.width * 4) ) {
-					chunk.push(this.pixels[ (x + xOffset) + canvas.width * 4 * y ]);	
+					chunk.push(pixels[ (x + xOffset) + canvas.width * 4 * y ]);	
 					xOffset++;
 				}
 				if (y % settings.scale === 0 || y === canvas.height - 1) {
-					let character = this.modes[mode](chunk, settings.gradient);
-					let color = this.colormodes[settings.colormode] ? this.colormodes[settings.colormode](chunk) : undefined;
-					characterMap[ Math.ceil(x / settings.scale / 4) + Math.ceil(canvas.width / scale) * Math.ceil(y / scale) ] = character;
-					colorMap[ Math.ceil(x / settings.scale / 4) + Math.ceil(canvas.width / scale) * Math.ceil(y / scale) ] = color;
+					let character = modes[settings.mode](chunk, settings.gradient);
+					let color = colormodes[settings.colormode] ? colormodes[settings.colormode](chunk) : undefined;
+					characterMap[ Math.ceil(x / settings.scale / 4) + Math.ceil(canvas.width / settings.scale) * Math.ceil(y / settings.scale) ] = character;
+					colorMap[ Math.ceil(x / settings.scale / 4) + Math.ceil(canvas.width / settings.scale) * Math.ceil(y / settings.scale) ] = color;
 					chunk.length = 0;
 				}
 				y += 1;
 			}
 			x += settings.scale * 4;
 		}
+		console.log(characterMap.length);
+		console.log(Math.ceil(pixels.length / 4 / settings.scale));
 		return new Ascii(characterMap, colorMap);
 	}
 }
@@ -160,12 +161,12 @@ const worker = new Worker('formatpixels.js');
 
 async function process(file) {
 	if (file.type.startsWith("image")) {
-		img = createImageBitmap(file);
-		canvas.width = img.width;
-		canvas.height = img.height;
-		ctx = loadImg(img, cvs);
-		const ctx = canvas.getContext('2d');
-		ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+		let img = await createImageBitmap(file);
+		cvs.width = img.width;
+		cvs.height = img.height;
+		const ctx = cvs.getContext('2d');
+		console.log(img);
+		ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
 
 		let convert = convertDecorator(cvs, ctx);
 
@@ -174,8 +175,9 @@ async function process(file) {
 		}
 		
 		let ascii = convert(settings);
+		console.log(ascii.map);
 		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / settings.scale) + "px";
-		output.innerHTML = ascii.toHtml();  
+		output.innerHTML = ascii.toHtml(Math.ceil(cvs.width / settings.scale));  
 	}
 }
 
