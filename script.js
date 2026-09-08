@@ -110,7 +110,6 @@ function convertDecorator(canvas, context) {
 	}
 
 	return function(settings){
-		console.log('Processing');
 		let characterMap = new Array();
 		let colorMap = new Array();
 		let x = 0, y = 0, xOffset = 0, chunk = []; 
@@ -134,8 +133,6 @@ function convertDecorator(canvas, context) {
 			}
 			x += settings.scale * 4;
 		}
-		console.log(characterMap.length);
-		console.log(Math.ceil(pixels.length / 4 / settings.scale));
 		return new Ascii(characterMap, colorMap);
 	}
 }
@@ -165,7 +162,6 @@ async function process(file) {
 		cvs.width = img.width;
 		cvs.height = img.height;
 		const ctx = cvs.getContext('2d');
-		console.log(img);
 		ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
 
 		let convert = convertDecorator(cvs, ctx);
@@ -175,7 +171,6 @@ async function process(file) {
 		}
 		
 		let ascii = convert(settings);
-		console.log(ascii.map);
 		output.style['font-size'] = output.offsetWidth / Math.ceil(cvs.width / settings.scale) + "px";
 		output.innerHTML = ascii.toHtml(Math.ceil(cvs.width / settings.scale));  
 	}
